@@ -1,8 +1,15 @@
 package com.solera.notes;
 
 import com.solera.notes.controller.NotaController;
+import com.solera.notes.models.Link;
 import com.solera.notes.models.Nota;
 import com.solera.notes.models.NotaResources;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+
+import java.time.LocalDate;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -21,24 +28,34 @@ class NotesApplicationTests {
 	@ParameterizedTest
 	@MethodSource("com.solera.notes.controller.NotaController#crearNotasTestData")
 	void crearNotaTest(Nota nota) {
-		NotaResources.crearNota(nota);
+		try {
+			NotaResources.crearNota(nota);
+			}catch(Exception e) {
+				System.out.println();
+			}
 		Assert.isTrue(NotaController.listaNotas.contains(nota), "La nota especificada no se ha creado");
 	}
 	
-	//
 	@ParameterizedTest
 	@MethodSource("com.solera.notes.controller.NotaController#crearNotasTestData")
 	void checkLink(Nota nota) {
+		try {
 		NotaResources.crearNota(nota);
-		Assert.isTrue(nota.getLink().contains(".pdf"), "No es pdf");
+		}catch(Exception e) {
+			System.out.println();
+		}
+		Assert.isTrue(NotaResources.linkType(nota.getLink()) == Link.PDF, "No es pdf");
 	}
 	
 	@ParameterizedTest
 	@MethodSource("com.solera.notes.controller.NotaController#crearNotasTestData")
 	void checkDate(Nota nota) {
-		NotaResources.crearNota(nota);
-		Assert.isTrue(nota.getStimatedDate().isAfter(nota.getCreationDate()), "Error, la fecha de estimación es menor que la de creación");
+		nota.setStimatedDate(LocalDate.now().minusDays(5));
+		try {
+			NotaResources.crearNota(nota);
+		}catch(Exception e) {
+			fail("Error");
+		}
 	}
 	
-
 }
